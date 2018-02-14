@@ -1,0 +1,43 @@
+#!/bin/ksh
+#==============================================================================#
+# mmsdrbackup - Create a versioned, timestamped backup of the Spectrul Scale   #
+#               configuration each time it is changed.                         #
+#------------------------------------------------------------------------------#
+# To create a remote copy, you must specify the REMOTE_HOST and the            #
+# REMOTE_DIRECTORY to sync it to.  You must also have passwordless ssh         #
+# configured to the remote backup node.                                        #
+#==============================================================================#
+VERSION=$1
+REPOSITORY=$2
+
+REMOTE_HOST=""
+REMOTE_DIRECTORY=""
+
+HOSTNAME=`hostname -s`
+TIMESTAMP=`date +"%Y%m%d_%H%M%S"`
+
+if [[ "${REPOSITORY}" == "CCR" ]] ; then
+   BACKUP_FILE="/var/mmfs/tmp/CCRBackup.${VERSION}.${TIMESTAMP}.${HOSTNAME}.tar.gz"
+   mmccr backup -A ${BACKUP_FILE}
+   RC=$?
+else
+   BACKUP_FILE="/var/mmfs/tmp/mmsdrfs.${VERSION}.${TIMESTAMP}.${HOSTNAME}"
+   cp -p /var/mmfs/gen/mmsdrfs ${BACKUP_FILE}
+   RC=$?
+fi
+
+if [[ ${RC} -gt 0 ]] ; then
+   echo "Error generating backup of the configuration. RC=${RC}"
+   exit {$RC}
+else
+   if [[ "x${REMOTE_HOST}" != "x" ]] ; then
+      scp ${BACKUP_FILE} ${REMOTE_HOST}:${REMOTE_DIRECTORY}
+      RC=$?
+      if [[ ${RC} -gt 0 ]] ; then
+         echo "Error storing the remote copy of the backup. RC=${RC}"
+      fi
+   fi
+fi
+
+return 0
+

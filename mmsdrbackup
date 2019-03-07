@@ -18,7 +18,7 @@ TIMESTAMP=`date +"%Y%m%d_%H%M%S"`
 
 if [[ "${REPOSITORY}" == "CCR" ]] ; then
    BACKUP_FILE="/var/mmfs/tmp/CCRBackup.${VERSION}.${TIMESTAMP}.${HOSTNAME}.tar.gz"
-   mmccr backup -A ${BACKUP_FILE}
+   /usr/lpp/mmfs/bin/mmccr backup -A ${BACKUP_FILE}
    RC=$?
 else
    BACKUP_FILE="/var/mmfs/tmp/mmsdrfs.${VERSION}.${TIMESTAMP}.${HOSTNAME}"
@@ -35,6 +35,12 @@ else
       RC=$?
       if [[ ${RC} -gt 0 ]] ; then
          echo "Error storing the remote copy of the backup. RC=${RC}"
+      fi
+   else
+      cp -p ${BACKUP_FILE} ${REMOTE_DIRECTORY}
+      RC=$?
+      if [[ ${RC} -gt 0 ]] ; then
+         echo "Error storing the backup. RC=${RC}"
       fi
    fi
 fi

@@ -10,6 +10,9 @@
 VERSION=$1
 REPOSITORY=$2
 
+# If REMOTE_HOST is empty, REMOTE_DIRECTORY can be set to a directory on the
+# local server and the file will be copied there instead of pushed to a
+# remote server.
 REMOTE_HOST=""
 REMOTE_DIRECTORY=""
 
